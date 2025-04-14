@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Certificados</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 12px;
+      background-color: white;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Consulta tu Certificado de Retención</h2>
+  <label for="nit">Ingresa tu NIT:</label>
+  <input type="text" id="nit" placeholder="Ej: 830024466">
+  <button onclick="consultarCertificado()">Consultar</button>
+  <div id="resultado"></div>
+
+  <script>
+    function consultarCertificado() {
+      const nit = document.getElementById('nit').value.trim();
+      if (!nit) {
+        document.getElementById('resultado').innerText = "Por favor ingresa un NIT.";
+        return;
+      }
+
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbybAuwnt6HnVVCcuT1VjVxnSAV08-Pwcvfkx5Q2Fkg5su5xphhNeWrLF1axmw18m50S/exec';
+
+      document.getElementById('resultado').innerText = "Buscando datos...";
+
+      fetch(`${apiUrl}?nit=${encodeURIComponent(nit)}`)
+        .then(response => response.text())
+        .then(data => {
+          if (data.startsWith("http")) {
+            document.getElementById('resultado').innerHTML = `
+              <p>Certificado generado correctamente:</p>
+              <a href="${data}" target="_blank">📄 Descargar PDF</a>
+            `;
+          } else {
+            document.getElementById('resultado').innerText = data;
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          document.getElementById('resultado').innerText = "Ocurrió un error al consultar.";
+        });
+    }
+  </script>
+</body>
+</html>
