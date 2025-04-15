@@ -59,25 +59,34 @@
         return;
       }
 
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbybAuwnt6HnVVCcuT1VjVxnSAV08-Pwcvfkx5Q2Fkg5su5xphhNeWrLF1axmw18m50S/exec';
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbybAuwnt6HnVVCcuT1VjVxnSAV08-Pwcvfkx5Q2Fkg5su5xphhNeWrLF1axmw18m50S/exec?nit=' + encodeURIComponent(nit);
+      document.getElementById('resultado').innerText = "Generando certificado...";
 
-      document.getElementById('resultado').innerText = "Buscando datos...";
-
-      fetch(`${apiUrl}?nit=${encodeURIComponent(nit)}`)
+      fetch(apiUrl)
         .then(response => response.text())
-        .then(data => {
-          if (data.startsWith("http")) {
-            document.getElementById('resultado').innerHTML = `
-              <p>Certificado generado correctamente:</p>
-              <a href="${data}" target="_blank">📄 Descargar PDF</a>
-            `;
+        .then(base64 => {
+          if (base64.startsWith("JVBER")) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "Certificado_" + nit + ".pdf";
+            link.click();
+
+            document.getElementById('resultado').innerText = "✅ Certificado generado correctamente.";
           } else {
-            document.getElementById('resultado').innerText = data;
+            document.getElementById('resultado').innerText = base64;
           }
         })
-        .catch(error => {
-          console.error(error);
-          document.getElementById('resultado').innerText = "Ocurrió un error al consultar.";
+        .catch(err => {
+          console.error(err);
+          document.getElementById('resultado').innerText = "Ocurrió un error al generar el certificado.";
         });
     }
   </script>
